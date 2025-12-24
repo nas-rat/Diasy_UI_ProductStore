@@ -27,7 +27,7 @@ const useProductStore = create((set) => ({
         try {
             // const res = await fetch(`http://localhost:5000/api/products/${pid}`, {
             //     method: 'DELETE',
-            // });\
+            // });
 
             const res = await fetch(`/api/products/${pid}`, {
                 method: 'DELETE',
@@ -93,6 +93,7 @@ const useProductStore = create((set) => ({
         }
 
         try {
+            //for development purposes use this route : http://localhost:5000/api/products
             const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: {

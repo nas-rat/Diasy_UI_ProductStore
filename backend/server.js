@@ -1,10 +1,10 @@
 import express, { Router } from 'express'
-import mongoose from 'mongoose';
 import productRoutes from './Routes/productRoutes.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path'
 import { fileURLToPath } from 'url';
+import { connectDB } from './config/db.js';
 
 
 const app = express();
@@ -16,13 +16,6 @@ const PORT = process.env.PORT || 5000
 // Vite build folder
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-
-
-//connecting to Mongodb compass
-mongoose.connect('mongodb://0.0.0.0:27017/DaisyProduct')
-    .then(() => console.log("mongodb compass is connected"))
-    .catch((err) => console.log(`Error in connection to database: ${err}`));
 
 app.use('/api/products', productRoutes)
 
@@ -39,5 +32,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.listen(PORT, () => {
+    connectDB();
     console.log(`the server is running on http://localhost:${PORT}/`);
 })

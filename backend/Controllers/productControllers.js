@@ -18,20 +18,18 @@ export const getProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
     const product = req.body;
 
-    console.log(product);
-
     if (!product.name || !product.price || !product.imageUrl) {
         res.status(400).send({ message: "All fields are required" });
         return;
     }
 
-    const newProduct = new Product(product);
-
     try {
+        const newProduct = new Product(product);
         await newProduct.save();
-        res.status(200).send({ succes: true, message: "Product created successfully!" });
+        res.status(200).send({ success: true, message: "Product created successfully!", data: newProduct });
+        console.log(newProduct);
     } catch (error) {
-        res.status(400).send({ succes: false, message: "Error in product creation" });
+        res.status(400).send({ success: false, message: "Error in product creation" });
     }
 }
 

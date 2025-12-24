@@ -6,14 +6,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    // proxy: {
-    //   '/api': {
-    //     target: 'http://localhost:5000',
-    //     changeOrigin: true,  // makes the Host header match the target
-    //     secure: false        // skips SSL verification, only matters if you ever proxy to https
-    //     // (optional) rewrite if you ever wanted to strip the /api prefix:
-    //     // rewrite: (path) => path.replace(/^\/api/, '/api'),
-    //   }
-    // }
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,  // makes the Host header match the target
+        secure: false        // skips SSL verification, only matters if you ever proxy to https
+        //     // (optional) rewrite if you ever wanted to strip the /api prefix:
+        //     // rewrite: (path) => path.replace(/^\/api/, '/api'),
+      }
+    }
   },
 })
