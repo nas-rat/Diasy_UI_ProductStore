@@ -1,37 +1,54 @@
-import express, { Router } from 'express'
-import productRoutes from './Routes/productRoutes.js';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path'
-import { fileURLToPath } from 'url';
-import { connectDB } from './config/db.js';
 
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import productRoutes from "./Routes/productRoutes.js";
+import { connectDB } from "./config/db.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-dotenv.config();
-const PORT = process.env.PORT || 5000
-
-// Vite build folder
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use('/api/products', productRoutes)
+dotenv.config({
+    path: path.resolve(__dirname, "../.env")
+});
 
+const app = express();
 
-// Serve frontend (only in production)
-if (process.env.NODE_ENV === 'production') {
-    const frontendPath = path.join(__dirname, '../frontend/dist');
-    app.use(express.static(frontendPath));
+app.use(express.json());
 
-    // Catch-all to serve index.html for any unknown route
-    app.get(/.*/, (req, res) => {
-        res.sendFile(path.join(frontendPath, 'index.html'));
+// Allow the local Vite frontend to communicate with Express.
+if (process.env.NODE_ENV !== "production") {
+    app.use(cors({
+        origin: "http://localhost:3000"
+    }));
+}
+
+// Connect to MongoDB before handling API requests.
+app.use("/api", async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
+        console.error("MongoDB connection error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Database connection failed"
+        });
+    }
+});
+
+// Product API routes
+app.use("/api/products", productRoutes);
+
+// Run a local server only during development.
+if (process.env.NODE_ENV !== "production") {
+    const PORT = process.env.PORT || 5000;
+
+    app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
     });
 }
 
-app.listen(PORT, () => {
-    connectDB();
-    console.log(`the server is running on http://localhost:${PORT}/`);
-})
+export default app;

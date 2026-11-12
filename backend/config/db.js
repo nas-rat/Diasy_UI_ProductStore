@@ -1,11 +1,37 @@
-import mongoose from 'mongoose';
+
+import mongoose from "mongoose";
+
+let cached = globalThis.mongoose;
+
+if (!cached) {
+    cached = globalThis.mongoose = {
+        conn: null,
+        promise: null
+    };
+}
 
 export const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("MongoDB connected successfully");
-    } catch (err) {
-        console.error(`Error connecting to MongoDB: ${err}`);
-        process.exit(1); // Exit process with failure
+    if (cached.conn) {
+        return cached.conn;
     }
+
+    if (!cached.promise) {
+        const mongoURI = process.env.MONGO_URI;
+
+        if (!mongoURI) {
+            throw new Error("MONGO_URI is not defined");
+        }
+
+        cached.promise = mongoose.connect(mongoURI, {
+            maxPoolSize: 10,
+            serverSelectionTimeoutMS: 5000
+        }).then((mongooseInstance) => mongooseInstance)
+            .catch((error) => {
+                cached.promise = null;
+                throw error;
+            });
+    }
+
+    cached.conn = await cached.promise;
+    return cached.conn;
 };
